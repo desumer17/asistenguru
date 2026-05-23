@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Guru Cerdas</title>
+    <title>Asisten Guru</title>
     <meta name="theme-color" content="#1e3c72">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -11,14 +11,14 @@
         
         /* 1. GRADASI LATAR BELAKANG ELEGAN */
         body { 
-            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); /* Gradasi pastel lembut */
+            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); 
             background-attachment: fixed;
             color: #333333; min-height: 100vh; display: flex; justify-content: center; 
         }
         
         .app-container { 
             width: 100%; max-width: 480px; min-height: 100vh; 
-            background: rgba(255, 255, 255, 0.95); /* Efek Glass/Kaca */
+            background: rgba(255, 255, 255, 0.95); 
             box-shadow: 0 10px 30px rgba(0,0,0,0.15); 
             position: relative; display: flex; flex-direction: column; overflow-x: hidden;
         }
@@ -63,7 +63,7 @@
         .icon-box { 
             width: 55px; height: 55px; border-radius: 18px; display: flex; align-items: center; justify-content: center; 
             font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* Efek Bouncy/Melayang */
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); 
         }
         
         /* Efek Hover (Melayang Naik & Bayangan Membesar) */
@@ -102,7 +102,7 @@
 
         <div id="loginView" class="app-view auth-container" style="justify-content: center;">
             <div style="text-align: center; margin-bottom: 30px;">
-                <h2 style="color: #1e3c72; font-size: 24px; font-weight: 800;">Portal Guru</h2>
+                <h2 style="color: #1e3c72; font-size: 24px; font-weight: 800;">Asisten Guru</h2>
                 <p style="color: #666; font-size: 14px;">Silakan masuk untuk melanjutkan</p>
             </div>
             <form onsubmit="handleLogin(event)">
@@ -115,7 +115,7 @@
 
         <div id="registerView" class="app-view auth-container">
             <div style="text-align: center; margin-bottom: 20px;">
-                <h2 style="color: #1e3c72; font-size: 22px; font-weight: 800;">Pendaftaran Akun</h2>
+                <h2 style="color: #1e3c72; font-size: 22px; font-weight: 800;">Pendaftaran Akun Asisten Guru</h2>
             </div>
             <form onsubmit="handleRegister(event)">
                 <div class="form-group"><label>Nama Lengkap & Gelar</label><input type="text" id="regNama" required></div>
@@ -150,7 +150,7 @@
                 <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
                     <h3 style="font-size: 14px; color: #1e3c72; margin-bottom: 5px;" id="sekolahNameDisplay">SD Negeri 17 Dauh Puri</h3>
                     <p style="font-size: 12px; color: #777;">Kepala Sekolah: <span id="kepsekNameDisplay">-</span></p>
-                    <p style="font-size: 11px; color: #999; margin-top: 15px;">Aplikasi Portal Cerdas © 2026</p>
+                    <p style="font-size: 11px; color: #999; margin-top: 15px;">Asisten Guru © 2026</p>
                 </div>
             </div>
         </div>
@@ -197,6 +197,7 @@
             }
         };
 
+        // ... Sisa JavaScript sama persis seperti sebelumnya ...
         function switchView(viewId) {
             document.querySelectorAll('.app-view').forEach(v => v.classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
@@ -206,7 +207,6 @@
             document.getElementById('loadingView').style.display = status ? 'flex' : 'none'; 
         }
 
-        // --- SISTEM LOGIN & SESSION ---
         function handleLogin(e) {
             e.preventDefault();
             const user = document.getElementById('loginUser').value;
@@ -220,7 +220,6 @@
             .then(data => {
                 showLoading(false);
                 if (data.status === "success") {
-                    // Simpan SEMUA data profil ke memori HP/Laptop
                     localStorage.setItem('userLogin', user);
                     localStorage.setItem('teacherName', data.profil.nama);
                     localStorage.setItem('teacherNip', data.profil.nip);
@@ -237,7 +236,6 @@
             }).catch(err => { showLoading(false); alert("Gagal koneksi server."); });
         }
 
-        // Update teks Dasbor dengan data dari LocalStorage
         function terapkanDataKeUI() {
             document.getElementById('activeTeacherName').innerText = localStorage.getItem('teacherName') || "Guru";
             document.getElementById('sekolahTitleTop').innerText = localStorage.getItem('sekolah') || "Sekolah Belum Diatur";
@@ -248,7 +246,6 @@
             document.getElementById('kepsekNameDisplay').innerText = nmKepsek + nipKepsek;
         }
 
-        // --- SISTEM RENDER MENU (DENGAN ANIMASI) ---
         function muatLaciDinamis() {
             fetch(`${APPS_SCRIPT_URL}?action=get_laci`)
             .then(res => res.json())
@@ -267,18 +264,16 @@
                 const urlTujuan = item.url + paramsData;
                 
                 itemDiv.onclick = () => window.open(urlTujuan, '_blank');
-                // Elemen HTML dibuat dengan kelas animasi yang sudah diset di CSS
                 itemDiv.innerHTML = `<div class="icon-box ${item.warna}">${item.ikon}</div><p>${item.nama}</p>`;
                 container.appendChild(itemDiv);
             });
         }
 
-        // --- SISTEM PROFIL MULTI-SEKOLAH ---
         function openProfile() {
             document.getElementById('profUsername').innerText = localStorage.getItem('userLogin');
             document.getElementById('profNama').value = localStorage.getItem('teacherName') || "";
             document.getElementById('profNip').value = localStorage.getItem('teacherNip') || "";
-            document.getElementById('profPass').value = ""; // Dikosongkan demi keamanan
+            document.getElementById('profPass').value = ""; 
             document.getElementById('profSekolah').value = localStorage.getItem('sekolah') || "";
             document.getElementById('profKepsek').value = localStorage.getItem('kepsek') || "";
             document.getElementById('profNipKepsek').value = localStorage.getItem('nipKepsek') || "";
@@ -304,8 +299,7 @@
             .then(data => {
                 showLoading(false);
                 if(data.status === "success") {
-                    alert("Profil dan Identitas Sekolah berhasil diperbarui!");
-                    // Update memori lokal
+                    alert("Profil berhasil diperbarui!");
                     localStorage.setItem('teacherName', document.getElementById('profNama').value);
                     localStorage.setItem('teacherNip', document.getElementById('profNip').value);
                     localStorage.setItem('sekolah', document.getElementById('profSekolah').value);
@@ -313,14 +307,13 @@
                     localStorage.setItem('nipKepsek', document.getElementById('profNipKepsek').value);
                     
                     terapkanDataKeUI();
-                    switchView('dashboardView'); // Balik ke Dasbor
+                    switchView('dashboardView'); 
                 } else {
                     alert(data.message);
                 }
             });
         }
 
-        // --- SISTEM REGISTRASI ---
         function handleRegister(e) {
             e.preventDefault();
             showLoading(true);
@@ -335,7 +328,7 @@
             .then(res => res.json())
             .then(data => {
                 showLoading(false);
-                if(data.status === "success") { alert("Sukses! Silakan login dan lengkapi data sekolah di menu Profil."); switchView('loginView'); }
+                if(data.status === "success") { alert("Sukses! Silakan login."); switchView('loginView'); }
                 else { alert(data.message); }
             });
         }
