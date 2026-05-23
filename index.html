@@ -1,330 +1,400 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asisten Guru</title>
-    <meta name="theme-color" content="#1e3c72">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Noto Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-        
-        body { 
-            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); 
-            background-attachment: fixed;
-            color: #333333; min-height: 100vh; display: flex; justify-content: center; 
-        }
-        
-        .app-container { 
-            width: 100%; max-width: 480px; min-height: 100vh; 
-            background: rgba(255, 255, 255, 0.95); 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15); 
-            position: relative; display: flex; flex-direction: column; overflow-x: hidden;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asisten Guru - 3D Creative</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1b222c">
+  <style>
+    :root {
+      --bg-main: #11161d; --bg-card: #1b222c; --bg-input: #232b37;
+      --color-gold: #dfb15b; --color-orange: #ff7a45;
+      --text-primary: #e3e7ed; --text-muted: #8c9ba5; --white: #ffffff;
+      --radius: 16px; --trans: all 0.3s ease;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
+    body { background-color: var(--bg-main); color: var(--text-primary); min-height: 100vh; overflow-x: hidden; }
+    
+    /* View System */
+    .app-view { display: none; max-width: 600px; margin: 0 auto; padding: 20px; animation: fadeIn 0.4s forwards; }
+    .app-view.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        @media (min-width: 768px) {
-            .app-container { max-width: 900px; margin: 30px 0; min-height: calc(100vh - 60px); border-radius: 20px; }
-            .grid-row { grid-template-columns: repeat(4, 1fr) !important; gap: 24px !important; }
-        }
+    /* Logo & Headings */
+    .logo-svg { width: 100px; height: 100px; display: block; margin: 40px auto 20px auto; filter: drop-shadow(0 4px 15px rgba(223, 177, 91, 0.2)); }
+    .title { font-size: 24px; font-weight: bold; color: var(--white); text-align: center; }
+    .subtitle { font-size: 13px; color: var(--color-gold); text-align: center; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; margin-bottom: 25px;}
 
-        .app-view { display: none; width: 100%; flex-direction: column; flex-grow: 1; }
-        .app-view.active { display: flex; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    /* Premium Cards & Inputs */
+    .card { background: var(--bg-card); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); border: 1px solid rgba(223,177,91,0.08); }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 5px; font-weight: bold; text-transform: uppercase; }
+    .input { width: 100%; background: var(--bg-input); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 12px; color: var(--white); font-size: 15px; }
+    .input:focus { outline: none; border-color: var(--color-gold); }
 
-        .header-container { 
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); 
-            color: white; padding: 30px 24px 40px 24px; 
-            border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; 
-            box-shadow: 0 8px 20px rgba(30, 60, 114, 0.3);
-        }
-        
-        .user-profile-section { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .welcome-text h2 { font-size: 13px; font-weight: 400; opacity: 0.9; }
-        .welcome-text h1 { font-size: 20px; font-weight: 700; margin-top: 2px; }
-        
-        .top-action-buttons { display: flex; gap: 10px; }
-        .icon-btn { 
-            background: rgba(255, 255, 255, 0.2); border: none; width: 40px; height: 40px; 
-            border-radius: 50%; color: white; font-size: 18px; cursor: pointer; 
-            transition: all 0.3s ease; backdrop-filter: blur(5px);
-        }
-        .icon-btn:hover { background: rgba(255, 255, 255, 0.4); transform: translateY(-2px); }
+    /* Buttons */
+    .btn { width: 100%; padding: 15px; border-radius: 12px; font-weight: bold; font-size: 15px; border: none; cursor: pointer; color: var(--white); transition: var(--trans); }
+    .btn:active { transform: scale(0.97); }
+    .btn-gold { background: linear-gradient(135deg, var(--color-gold), #b8860b); }
+    .btn-orange { background: linear-gradient(135deg, var(--color-orange), #ff5722); }
+    .btn-gray { background: var(--bg-input); color: var(--text-primary); border: 1px solid rgba(255,255,255,0.1); }
+    .toggle-auth { text-align: center; font-size: 14px; margin-top: 15px; color: var(--text-muted); }
+    .toggle-auth span { color: var(--color-gold); cursor: pointer; font-weight: bold; }
 
-        .menu-container { background: white; margin: -20px 20px 20px 20px; border-radius: 20px; padding: 24px 16px; box-shadow: 0 8px 25px rgba(0,0,0,0.06); z-index: 10; }
-        .grid-row { display: grid; grid-template-columns: repeat(4, 1fr); row-gap: 24px; column-gap: 12px; }
-        
-        .grid-item { display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; }
-        .grid-item p { font-size: 11px; font-weight: 600; color: #4a4a4a; line-height: 1.3; margin-top: 8px; transition: color 0.3s; }
-        
-        .icon-box { 
-            width: 55px; height: 55px; border-radius: 18px; display: flex; align-items: center; justify-content: center; 
-            font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); 
-        }
-        
-        .grid-item:hover .icon-box { transform: translateY(-6px) scale(1.08); box-shadow: 0 12px 20px rgba(0,0,0,0.12); }
-        .grid-item:hover p { color: #1e3c72; }
-        
-        .grid-item:active .icon-box { transform: scale(0.92); box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: all 0.1s; }
+    /* Profile Dash */
+    .profile-banner { display: flex; align-items: center; gap: 15px; background: rgba(27,34,44,0.6); padding: 15px; border-radius: var(--radius); border-left: 4px solid var(--color-gold); margin-bottom: 20px; }
+    .avatar { width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--color-gold); display: flex; align-items: center; justify-content: center; overflow: hidden; background: var(--bg-input); }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .status-badge { background: #20c997; color: #fff; font-size: 10px; padding: 3px 8px; border-radius: 50px; font-weight: bold; display: inline-block; margin-bottom: 10px; }
+    .status-badge.offline { background: var(--color-orange); }
 
-        .bg-green { background: linear-gradient(135deg, #e8f5e9, #c8e6c9); color: #2e7d32; }
-        .bg-blue { background: linear-gradient(135deg, #e3f2fd, #bbdefb); color: #1565c0; }
-        .bg-orange { background: linear-gradient(135deg, #fff3e0, #ffe0b2); color: #e65100; }
-        .bg-purple { background: linear-gradient(135deg, #f3e5f5, #e1bee7); color: #6a1b9a; }
-        .bg-teal { background: linear-gradient(135deg, #e0f2f1, #b2dfdb); color: #00695c; }
-        .bg-red { background: linear-gradient(135deg, #ffebee, #ffcdd2); color: #c62828; }
+    /* Drawers (Laci) */
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .drawer { background: var(--bg-card); border-radius: var(--radius); padding: 20px; text-align: center; position: relative; overflow: hidden; cursor: pointer; border: 1px solid rgba(255,255,255,0.02); }
+    .drawer::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background-color: var(--d-color, var(--color-gold)); }
+    .drawer:active { transform: translateY(-3px); }
+    .d-icon { font-size: 30px; margin-bottom: 8px; }
+    .d-title { font-size: 13px; font-weight: bold; }
 
-        .auth-container { padding: 40px 28px; }
-        .form-group { margin-bottom: 16px; }
-        .form-group label { display: block; font-size: 12px; font-weight: 700; color: #555; margin-bottom: 6px; }
-        .form-group input { width: 100%; padding: 14px; border: 1.5px solid #e0e0e0; border-radius: 12px; font-size: 14px; outline: none; transition: all 0.3s; background: #f9f9f9; }
-        .form-group input:focus { border-color: #2a5298; background: white; box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1); }
-        .btn-primary { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 10px; transition: transform 0.2s, box-shadow 0.2s; }
-        .btn-primary:active { transform: scale(0.98); }
-        
-        .loading-overlay { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.95); z-index: 100; align-items: center; justify-content: center; font-weight: 700; color: #1e3c72; flex-direction: column; gap: 10px; }
-        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #1e3c72; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    </style>
+    /* Nav & Lists */
+    .nav { background: var(--bg-card); padding: 12px; border-radius: 16px; display: flex; justify-content: space-around; margin-top: 25px; }
+    .nav-item { text-align: center; font-size: 11px; color: var(--text-muted); cursor: pointer; }
+    .nav-item.active { color: var(--color-gold); }
+    .list-item { background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+    .remove { color: var(--color-orange); cursor: pointer; font-weight: bold; }
+
+    /* Popup & Iframe */
+    .popup-overlay, .iframe-wrapper { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; display: none; }
+    .popup-overlay { background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); justify-content: center; align-items: center; padding: 20px; }
+    .popup-box { background: var(--bg-card); padding: 25px; border-radius: var(--radius); text-align: center; border: 1px solid var(--color-gold); width: 100%; max-width: 350px; }
+    .popup-btn-wrap { display: flex; gap: 10px; margin-top: 20px; }
+    .iframe-wrapper { background: var(--bg-main); flex-direction: column; }
+    .iframe-head { background: var(--bg-card); padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+    .iframe-body { flex: 1; border: none; background: #fff; width: 100%; }
+
+    .footer { text-align: center; font-size: 11px; color: var(--text-muted); margin-top: 40px; padding: 15px; border-top: 1px solid rgba(255,255,255,0.05); }
+
+    /* A4 CV Print CSS */
+    @media print {
+      body * { visibility: hidden; }
+      #printArea, #printArea * { visibility: visible; }
+      #printArea { position: absolute; left: 0; top: 0; width: 210mm; padding: 15mm; background: #fff; color: #000; font-family: 'Times New Roman', serif; }
+      .cv-h { border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; }
+      .cv-title { font-size: 22px; font-weight: bold; text-transform: uppercase; }
+      .cv-sec { font-weight: bold; font-size: 16px; border-bottom: 1px solid #000; margin-top: 15px; text-transform: uppercase; }
+      .cv-tbl { width: 100%; font-size: 14px; margin-top: 10px; }
+      .cv-tbl td { padding: 4px 0; }
+      .cv-photo { width: 35mm; height: 45mm; border: 1px solid #000; object-fit: cover; }
+    }
+  </style>
 </head>
 <body>
 
-    <div class="app-container">
-        <div id="loadingView" class="loading-overlay"><div class="loader"></div><p>Memproses...</p></div>
+  <div class="popup-overlay" id="sysPopup">
+    <div class="popup-box">
+      <div id="popupMsg" style="font-weight:bold; font-size:16px;"></div>
+      <div class="popup-btn-wrap">
+        <button class="btn btn-gray" id="popCancel">Batal</button>
+        <button class="btn btn-gold" id="popConfirm">Yakin</button>
+      </div>
+    </div>
+  </div>
 
-        <div id="loginView" class="app-view auth-container" style="justify-content: center;">
-            <div style="text-align: center; margin-bottom: 30px;">
-                <h2 style="color: #1e3c72; font-size: 24px; font-weight: 800;">Asisten Guru</h2>
-                <p style="color: #666; font-size: 14px;">Silakan masuk untuk melanjutkan</p>
-            </div>
-            <form onsubmit="handleLogin(event)">
-                <div class="form-group"><label>Username</label><input type="text" id="loginUser" required></div>
-                <div class="form-group"><label>Password</label><input type="password" id="loginPass" required></div>
-                <button type="submit" class="btn-primary">Masuk Aplikasi</button>
-            </form>
-            <div style="text-align: center; margin-top: 20px; font-size: 13px;">Belum punya akun? <span style="color: #2a5298; font-weight: 700; cursor: pointer;" onclick="switchView('registerView')">Daftar Baru</span></div>
-        </div>
+  <div class="iframe-wrapper" id="sysIframe">
+    <div class="iframe-head">
+      <strong id="ifTitle">Browser</strong>
+      <button class="btn btn-gray" style="width:auto; padding:5px 15px;" onclick="closeIframe()">Tutup</button>
+    </div>
+    <iframe class="iframe-body" id="ifBody"></iframe>
+  </div>
 
-        <div id="registerView" class="app-view auth-container">
-            <div style="text-align: center; margin-bottom: 20px;">
-                <h2 style="color: #1e3c72; font-size: 22px; font-weight: 800;">Pendaftaran Akun Asisten Guru</h2>
-            </div>
-            <form onsubmit="handleRegister(event)">
-                <div class="form-group"><label>Nama Lengkap & Gelar</label><input type="text" id="regNama" required></div>
-                <div class="form-group"><label>NIP Pegawai</label><input type="number" id="regNip" required></div>
-                <div class="form-group"><label>Username Baru</label><input type="text" id="regUser" required></div>
-                <div class="form-group"><label>Password Baru</label><input type="password" id="regPass" required></div>
-                <button type="submit" class="btn-primary">Buat Akun</button>
-            </form>
-            <div style="text-align: center; margin-top: 20px; font-size: 13px;">Sudah terdaftar? <span style="color: #2a5298; font-weight: 700; cursor: pointer;" onclick="switchView('loginView')">Kembali ke Login</span></div>
-        </div>
-
-        <div id="dashboardView" class="app-view">
-            <div class="header-container">
-                <div class="user-profile-section">
-                    <div class="welcome-text">
-                        <h2 id="sekolahTitleTop">SD Negeri 17 Dauh Puri</h2>
-                        <h1 id="activeTeacherName">Nama Guru</h1>
-                    </div>
-                    <div class="top-action-buttons">
-                        <button class="icon-btn" onclick="openProfile()">👤</button>
-                        <button class="icon-btn" onclick="logout()">❌</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="menu-container">
-                <div class="grid-row" id="menuGridContainer">
-                    </div>
-            </div>
-
-            <div style="padding: 20px; text-align: center;">
-                <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
-                    <h3 style="font-size: 14px; color: #1e3c72; margin-bottom: 5px;" id="sekolahNameDisplay">SD Negeri 17 Dauh Puri</h3>
-                    <p style="font-size: 12px; color: #777;">Kepala Sekolah: <span id="kepsekNameDisplay">-</span></p>
-                    <p style="font-size: 11px; color: #1e3c72; margin-top: 15px; font-weight: 700;">Hak Cipta &copy; 2026 3D Creative</p>
-                </div>
-            </div>
-        </div>
-
-        <div id="profileView" class="app-view auth-container" style="overflow-y: auto;">
-            <div style="display: flex; align-items: center; margin-bottom: 25px;">
-                <button onclick="switchView('dashboardView')" style="background:none;border:none;font-size:24px;margin-right:10px;cursor:pointer;color:#1e3c72;">←</button>
-                <h2 style="color: #1e3c72; font-size: 20px; font-weight: 800;">Pengaturan Profil</h2>
-            </div>
-            
-            <form onsubmit="handleUpdateProfile(event)">
-                <div style="background: #f0f4f8; padding: 15px; border-radius: 12px; margin-bottom: 20px;">
-                    <p style="font-size: 12px; color: #555;">Username Akun (Tetap):</p>
-                    <p style="font-weight: 700; color: #1e3c72;" id="profUsername">-</p>
-                </div>
-
-                <h3 style="font-size: 14px; color: #2a5298; border-bottom: 2px solid #eee; padding-bottom: 5px; margin-bottom: 15px;">Data Pribadi</h3>
-                <div class="form-group"><label>Nama Lengkap & Gelar</label><input type="text" id="profNama" required></div>
-                <div class="form-group"><label>NIP Anda</label><input type="number" id="profNip"></div>
-                <div class="form-group"><label>Password (Isi jika ingin ganti)</label><input type="password" id="profPass" placeholder="Biarkan kosong jika tidak diganti"></div>
-
-                <h3 style="font-size: 14px; color: #2a5298; border-bottom: 2px solid #eee; padding-bottom: 5px; margin-bottom: 15px; margin-top: 25px;">Data Instansi / Sekolah</h3>
-                <div class="form-group"><label>Nama Sekolah</label><input type="text" id="profSekolah" required></div>
-                <div class="form-group"><label>Nama Kepala Sekolah</label><input type="text" id="profKepsek"></div>
-                <div class="form-group"><label>NIP Kepala Sekolah</label><input type="number" id="profNipKepsek"></div>
-
-                <button type="submit" class="btn-primary" style="margin-top: 20px; margin-bottom: 40px;">Simpan Perubahan</button>
-            </form>
-        </div>
-
+  <div class="app-view active" id="vAuth">
+    <svg class="logo-svg" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+      <rect width="512" height="512" rx="100" fill="#1b222c"/><circle cx="256" cy="256" r="180" fill="none" stroke="#dfb15b" stroke-width="8"/>
+      <path d="M180 340 L256 220 L332 340 Z" fill="none" stroke="#dfb15b" stroke-width="20" stroke-linejoin="round"/>
+      <path d="M210 290 L302 290" stroke="#ff7a45" stroke-width="12"/>
+      <polygon points="256,130 265,150 288,150 270,165 277,188 256,175 235,188 242,165 224,150 247,150" fill="#ff7a45"/>
+    </svg>
+    <div class="title">ASISTEN GURU</div><div class="subtitle">3D Creative Premium</div>
+    
+    <div class="card" id="cLogin">
+      <div class="form-group"><label>Username</label><input type="text" class="input" id="lUser"></div>
+      <div class="form-group"><label>Password</label><input type="password" class="input" id="lPass"></div>
+      <button class="btn btn-gold" onclick="doLogin()">LOGIN</button>
+      <div class="toggle-auth">Belum punya akun? <span onclick="toggleA(false)">Daftar</span></div>
     </div>
 
-    <script>
-        // ⚠️ PASTE URL WEB APP APPS SCRIPT BOS DI SINI
-        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyjI4XjBdwbRYR-zx9JeLsxYHc9DqcrZkjgxKdS5sKa04hfQzPXPxZ6inlH8rLbv9P-/exec";
+    <div class="card" id="cReg" style="display:none;">
+      <div class="form-group"><label>Nama Lengkap</label><input type="text" class="input" id="rName"></div>
+      <div class="form-group"><label>Username</label><input type="text" class="input" id="rUser"></div>
+      <div class="form-group"><label>Password</label><input type="password" class="input" id="rPass"></div>
+      <button class="btn btn-orange" onclick="doReg()">DAFTAR AKUN</button>
+      <div class="toggle-auth">Sudah punya akun? <span onclick="toggleA(true)">Login</span></div>
+    </div>
+  </div>
 
-        window.onload = function() {
-            if (localStorage.getItem('userLogin')) {
-                terapkanDataKeUI();
-                switchView('dashboardView');
-                muatLaciDinamis();
-            } else {
-                switchView('loginView');
-            }
-        };
+  <div class="app-view" id="vOnboard">
+    <div class="title">IDENTITAS RESMI</div><div class="subtitle">Kelengkapan Data Pegawai</div>
+    <div class="card">
+      <div style="text-align:center; margin-bottom:15px;">
+        <label>Foto Profil Lokal (Max 30KB)</label>
+        <div class="avatar" id="oPhoto" style="margin:5px auto 10px auto; width:70px; height:70px;">👤</div>
+        <input type="file" id="inFile" accept="image/*" style="display:none;" onchange="processPhoto(event)">
+        <button class="btn btn-gray" style="width:auto; padding:5px 15px;" onclick="document.getElementById('inFile').click()">Pilih Foto</button>
+      </div>
+      <div class="form-group"><label>Username (Terkunci)</label><input type="text" class="input" id="oUser" disabled></div>
+      <div class="form-group"><label>Nama & Gelar</label><input type="text" class="input" id="oName"></div>
+      <div class="form-group"><label>NIP Pegawai</label><input type="text" class="input" id="oNip"></div>
+      <div class="form-group"><label>Sekolah</label><input type="text" class="input" id="oSchool"></div>
+      <div class="form-group"><label>Kepala Sekolah</label><input type="text" class="input" id="oKepsek"></div>
+      <div class="form-group"><label>NIP Kepala Sekolah</label><input type="text" class="input" id="oKepsekNip"></div>
+      <div class="form-group"><label>Semester</label><select class="input" id="oSem"><option>1 (Ganjil)</option><option>2 (Genap)</option></select></div>
+      <div class="form-group"><label>Tahun Pelajaran</label><input type="text" class="input" id="oYear"></div>
+      <button class="btn btn-gold" onclick="saveOnboard()">SIMPAN IDENTITAS</button>
+    </div>
+  </div>
 
-        function switchView(viewId) {
-            document.querySelectorAll('.app-view').forEach(v => v.classList.remove('active'));
-            document.getElementById(viewId).classList.add('active');
-        }
+  <div class="app-view" id="vDash">
+    <div id="syncBadge" class="status-badge">Cloud Connected</div>
+    <div class="profile-banner">
+      <div class="avatar" id="dPhoto">👤</div>
+      <div><div style="font-weight:bold; font-size:16px;" id="dName">Nama Guru</div><div style="font-size:12px; color:var(--text-muted);" id="dSchool">Sekolah</div></div>
+    </div>
+    
+    <div class="grid" id="dGrid"></div>
 
-        function showLoading(status) { 
-            document.getElementById('loadingView').style.display = status ? 'flex' : 'none'; 
-        }
+    <div class="nav">
+      <div class="nav-item active" onclick="switchV('vDash')"><div>📱</div>Laci Utama</div>
+      <div class="nav-item" onclick="openAgenda()"><div>📅</div>Agenda</div>
+      <div class="nav-item" onclick="openCV()"><div>📄</div>Cetak CV</div>
+      <div class="nav-item" onclick="openSettings()"><div>⚙️</div>Setelan</div>
+    </div>
+  </div>
 
-        function handleLogin(e) {
-            e.preventDefault();
-            const user = document.getElementById('loginUser').value;
-            const pass = document.getElementById('loginPass').value;
-            showLoading(true);
+  <div class="app-view" id="vAgenda">
+    <div class="title">AGENDA PINTAR</div><div class="subtitle">Sync Google Calendar</div>
+    <div class="card">
+      <div class="form-group"><label>Judul Kegiatan</label><input type="text" class="input" id="aTitle"></div>
+      <div class="form-group"><label>Tanggal</label><input type="date" class="input" id="aDate"></div>
+      <div class="form-group"><label>Waktu</label><input type="time" class="input" id="aTime"></div>
+      <div class="form-group"><label>Catatan</label><input type="text" class="input" id="aNote"></div>
+      <button class="btn btn-orange" onclick="addAgenda()">TAMBAH & BUKA ALARM GCAL</button>
+    </div>
+    <div class="card"><label>Daftar Agenda Aktif</label><div id="aList"></div></div>
+    <button class="btn btn-gray" onclick="switchV('vDash')">Kembali</button>
+  </div>
 
-            if(APPS_SCRIPT_URL.includes("SILAKAN_PASTE")) { setTimeout(() => { showLoading(false); alert("URL Backend belum dipasang!"); }, 1000); return; }
+  <div class="app-view" id="vSet">
+    <div class="title">PENGATURAN LACI</div><div class="subtitle">In-App Builder</div>
+    <div class="card">
+      <div class="form-group"><label>Nama Laci Baru</label><input type="text" class="input" id="sTitle"></div>
+      <div class="form-group"><label>Emoji Ikon</label><input type="text" class="input" id="sIcon" placeholder="📁"></div>
+      <div class="form-group"><label>Warna Aksen</label><input type="color" class="input" id="sColor" value="#dfb15b" style="padding:0; height:40px;"></div>
+      <div class="form-group"><label>URL Laci</label><input type="url" class="input" id="sUrl"></div>
+      <button class="btn btn-gold" onclick="addDrawer()">TAMBAH LACI</button>
+    </div>
+    <div class="card"><label>Laci Terpasang</label><div id="sList"></div></div>
+    <button class="btn btn-gray" style="margin-bottom:10px;" onclick="switchV('vOnboard')">Edit Identitas</button>
+    <button class="btn btn-gray" style="margin-bottom:10px; color:#ff7a45; border-color:#ff7a45;" onclick="doLogout()">Logout</button>
+    <button class="btn btn-gray" onclick="switchV('vDash')">Kembali</button>
+  </div>
 
-            fetch(`${APPS_SCRIPT_URL}?action=login&username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}`)
-            .then(res => res.json())
-            .then(data => {
-                showLoading(false);
-                if (data.status === "success") {
-                    localStorage.setItem('userLogin', user);
-                    localStorage.setItem('teacherName', data.profil.nama);
-                    localStorage.setItem('teacherNip', data.profil.nip);
-                    localStorage.setItem('sekolah', data.profil.sekolah);
-                    localStorage.setItem('kepsek', data.profil.kepsek);
-                    localStorage.setItem('nipKepsek', data.profil.nip_kepsek);
-                    
-                    terapkanDataKeUI();
-                    switchView('dashboardView');
-                    renderTombolMenu(data.menu);
-                } else {
-                    alert("Gagal: Username atau Password salah.");
-                }
-            }).catch(err => { showLoading(false); alert("Gagal koneksi server."); });
-        }
+  <div class="app-view" id="vCV">
+    <div class="title">CV AUTOMAKER</div><div class="subtitle">Mesin Cetak A4</div>
+    <div class="card">
+      <div class="form-group"><label>Pendidikan</label><input type="text" class="input" id="cvE_in"><button class="btn btn-gray" style="margin-top:5px; padding:8px;" onclick="addCV('E')">+ Tambah</button><div id="cvE_lst" style="margin-top:10px;"></div></div>
+      <div class="form-group"><label>Organisasi</label><input type="text" class="input" id="cvO_in"><button class="btn btn-gray" style="margin-top:5px; padding:8px;" onclick="addCV('O')">+ Tambah</button><div id="cvO_lst" style="margin-top:10px;"></div></div>
+      <div class="form-group"><label>Prestasi/Keahlian</label><input type="text" class="input" id="cvS_in"><button class="btn btn-gray" style="margin-top:5px; padding:8px;" onclick="addCV('S')">+ Tambah</button><div id="cvS_lst" style="margin-top:10px;"></div></div>
+      <button class="btn btn-gold" onclick="printCV()">CETAK / SIMPAN PDF A4</button>
+    </div>
+    <button class="btn btn-gray" onclick="switchV('vDash')">Kembali</button>
+  </div>
 
-        function terapkanDataKeUI() {
-            document.getElementById('activeTeacherName').innerText = localStorage.getItem('teacherName') || "Guru";
-            document.getElementById('sekolahTitleTop').innerText = localStorage.getItem('sekolah') || "Sekolah Belum Diatur";
-            document.getElementById('sekolahNameDisplay').innerText = localStorage.getItem('sekolah') || "-";
-            
-            let nmKepsek = localStorage.getItem('kepsek') || "-";
-            let nipKepsek = localStorage.getItem('nipKepsek') ? " (NIP. " + localStorage.getItem('nipKepsek') + ")" : "";
-            document.getElementById('kepsekNameDisplay').innerText = nmKepsek + nipKepsek;
-        }
+  <div id="printArea" style="display:none;"></div>
+  
+  <div class="footer">Hak Cipta &copy; 2026 3D Creative</div>
 
-        function muatLaciDinamis() {
-            fetch(`${APPS_SCRIPT_URL}?action=get_laci`)
-            .then(res => res.json())
-            .then(data => { if(data.status === "success") renderTombolMenu(data.menu); });
-        }
+  <script>
+    // ===== MASTER SERVER URL: GANTI DENGAN LINK APPS SCRIPT BOS =====
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzamSNAHNkpVaCKoTj6YSrQOIUceDg87HaD5jnvjCPeXiw-UKcahnwsp5f3dkOnOkT-cg/exec";
 
-        function renderTombolMenu(arrayMenu) {
-            const container = document.getElementById('menuGridContainer');
-            container.innerHTML = "";
-            if(arrayMenu.length === 0) return container.innerHTML = "<p style='grid-column: span 4; font-size:12px; text-align:center;'>Menu kosong.</p>";
+    let cUser = null;
+    let uData = { pro: {}, drw: [], agn: [], cv: { E:[], O:[], S:[] } };
+    let popCB = null;
 
-            arrayMenu.forEach(item => {
-                const itemDiv = document.createElement('div');
-                itemDiv.className = "grid-item";
-                const paramsData = `?guru=${encodeURIComponent(localStorage.getItem('teacherName'))}&sekolah=${encodeURIComponent(localStorage.getItem('sekolah'))}`;
-                const urlTujuan = item.url + paramsData;
-                
-                itemDiv.onclick = () => window.open(urlTujuan, '_blank');
-                itemDiv.innerHTML = `<div class="icon-box ${item.warna}">${item.ikon}</div><p>${item.nama}</p>`;
-                container.appendChild(itemDiv);
-            });
-        }
+    // Sistem Status & Sinkronisasi
+    window.addEventListener('load', () => {
+      checkNet(); window.addEventListener('online', () => { checkNet(); runSync(); }); window.addEventListener('offline', checkNet);
+      cUser = localStorage.getItem("ag_user");
+      if(cUser) { loadLoc(); uData.pro.onboarded ? (switchV('vDash'), renderDash()) : switchV('vOnboard'); }
+    });
+    function checkNet() {
+      const b = document.getElementById('syncBadge'); if(!b) return;
+      if(navigator.onLine) { b.innerText = "Cloud Connected"; b.classList.remove('offline'); }
+      else { b.innerText = "Offline Mode Lokal"; b.classList.add('offline'); }
+    }
 
-        function openProfile() {
-            document.getElementById('profUsername').innerText = localStorage.getItem('userLogin');
-            document.getElementById('profNama').value = localStorage.getItem('teacherName') || "";
-            document.getElementById('profNip').value = localStorage.getItem('teacherNip') || "";
-            document.getElementById('profPass').value = ""; 
-            document.getElementById('profSekolah').value = localStorage.getItem('sekolah') || "";
-            document.getElementById('profKepsek').value = localStorage.getItem('kepsek') || "";
-            document.getElementById('profNipKepsek').value = localStorage.getItem('nipKepsek') || "";
-            switchView('profileView');
-        }
+    // Navigasi View
+    function switchV(id) { document.querySelectorAll('.app-view').forEach(v => v.classList.remove('active')); document.getElementById(id).classList.add('active'); window.scrollTo(0,0); }
+    function toggleA(isL) { document.getElementById('cLogin').style.display = isL ? 'block' : 'none'; document.getElementById('cReg').style.display = isL ? 'none' : 'block'; }
 
-        function handleUpdateProfile(e) {
-            e.preventDefault();
-            showLoading(true);
-            
-            const payload = new URLSearchParams();
-            payload.append('action', 'update_profile');
-            payload.append('username', localStorage.getItem('userLogin'));
-            payload.append('nama', document.getElementById('profNama').value);
-            payload.append('nip', document.getElementById('profNip').value);
-            payload.append('password', document.getElementById('profPass').value);
-            payload.append('sekolah', document.getElementById('profSekolah').value);
-            payload.append('kepsek', document.getElementById('profKepsek').value);
-            payload.append('nip_kepsek', document.getElementById('profNipKepsek').value);
+    // Popup Jaring Pengaman
+    function askPop(msg, cb) { document.getElementById('popupMsg').innerText = msg; document.getElementById('sysPopup').style.display = 'flex'; popCB = cb; }
+    document.getElementById('popConfirm').onclick = () => { document.getElementById('sysPopup').style.display = 'none'; if(popCB) popCB(); };
+    document.getElementById('popCancel').onclick = () => { document.getElementById('sysPopup').style.display = 'none'; popCB = null; };
 
-            fetch(APPS_SCRIPT_URL, { method: 'POST', body: payload })
-            .then(res => res.json())
-            .then(data => {
-                showLoading(false);
-                if(data.status === "success") {
-                    alert("Profil berhasil diperbarui!");
-                    localStorage.setItem('teacherName', document.getElementById('profNama').value);
-                    localStorage.setItem('teacherNip', document.getElementById('profNip').value);
-                    localStorage.setItem('sekolah', document.getElementById('profSekolah').value);
-                    localStorage.setItem('kepsek', document.getElementById('profKepsek').value);
-                    localStorage.setItem('nipKepsek', document.getElementById('profNipKepsek').value);
-                    
-                    terapkanDataKeUI();
-                    switchView('dashboardView'); 
-                } else {
-                    alert(data.message);
-                }
-            });
-        }
+    // Login & Register via Fetch
+    function doReg() {
+      if(!navigator.onLine) return alert("Pendaftaran butuh internet.");
+      fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "register", payload: { username: document.getElementById('rUser').value, password: document.getElementById('rPass').value, fullName: document.getElementById('rName').value }}) })
+      .then(r => r.json()).then(d => { alert(d.message); if(d.status === "success") toggleA(true); });
+    }
+    function doLogin() {
+      const u = document.getElementById('lUser').value, p = document.getElementById('lPass').value;
+      if(!navigator.onLine) {
+        if(localStorage.getItem("ag_user") === u) { loadLoc(); switchV('vDash'); renderDash(); return; }
+        return alert("Login pertama kali wajib online.");
+      }
+      fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "login", payload: { username: u, password: p }}) })
+      .then(r => r.json()).then(d => {
+        if(d.status === "success") {
+          cUser = d.profile.username; localStorage.setItem("ag_user", cUser);
+          uData.pro = d.profile; uData.drw = d.drawers; uData.agn = d.agendas;
+          saveLoc(); d.profile.onboarded ? (switchV('vDash'), renderDash()) : openOnboard();
+        } else alert(d.message);
+      });
+    }
 
-        function handleRegister(e) {
-            e.preventDefault();
-            showLoading(true);
-            const payload = new URLSearchParams();
-            payload.append('action', 'register');
-            payload.append('nama', document.getElementById('regNama').value);
-            payload.append('nip', document.getElementById('regNip').value);
-            payload.append('username', document.getElementById('regUser').value);
-            payload.append('password', document.getElementById('regPass').value);
+    // Photo Compressor (Base64)
+    function processPhoto(e) {
+      const f = e.target.files[0]; if(!f) return;
+      const r = new FileReader();
+      r.onload = ev => {
+        const img = new Image(); img.onload = () => {
+          const cvs = document.createElement('canvas'); const max = 300; let w = img.width, h = img.height;
+          if(w > h) { if(w > max) { h *= max/w; w = max; } } else { if(h > max) { w *= max/h; h = max; } }
+          cvs.width = w; cvs.height = h; cvs.getContext('2d').drawImage(img, 0, 0, w, h);
+          const b64 = cvs.toDataURL('image/jpeg', 0.7); localStorage.setItem("p_"+cUser, b64);
+          document.getElementById('oPhoto').innerHTML = `<img src="${b64}">`;
+        }; img.src = ev.target.result;
+      }; r.readAsDataURL(f);
+    }
 
-            fetch(APPS_SCRIPT_URL, { method: 'POST', body: payload })
-            .then(res => res.json())
-            .then(data => {
-                showLoading(false);
-                if(data.status === "success") { alert("Sukses! Silakan login."); switchView('loginView'); }
-                else { alert(data.message); }
-            });
-        }
+    // Onboarding
+    function openOnboard() {
+      switchV('vOnboard'); document.getElementById('oUser').value = cUser;
+      ['Name','Nip','School','Kepsek','KepsekNip','Year'].forEach(k => document.getElementById('o'+k).value = uData.pro[k.toLowerCase()] || "");
+      const ph = localStorage.getItem("p_"+cUser); if(ph) document.getElementById('oPhoto').innerHTML = `<img src="${ph}">`;
+    }
+    function saveOnboard() {
+      askPop("Yakin data pegawai sudah benar?", () => {
+        uData.pro = { username: cUser, fullName: document.getElementById('oName').value, nip: document.getElementById('oNip').value, schoolName: document.getElementById('oSchool').value, headmasterName: document.getElementById('oKepsek').value, headmasterNip: document.getElementById('oKepsekNip').value, semester: document.getElementById('oSem').value, academicYear: document.getElementById('oYear').value, onboarded: true };
+        saveLoc(); runSyncProfile(); switchV('vDash'); renderDash();
+      });
+    }
 
-        function logout() { localStorage.clear(); switchView('loginView'); }
-    </script>
+    // Dashboard & Drawers
+    function renderDash() {
+      document.getElementById('dName').innerText = uData.pro.fullName; document.getElementById('dSchool').innerText = uData.pro.schoolName;
+      const ph = localStorage.getItem("p_"+cUser); document.getElementById('dPhoto').innerHTML = ph ? `<img src="${ph}">` : "👤";
+      const g = document.getElementById('dGrid'); g.innerHTML = "";
+      uData.drw.forEach(d => {
+        const c = document.createElement('div'); c.className = "drawer"; c.style.setProperty('--d-color', d.color);
+        c.innerHTML = `<div class="d-icon">${d.icon}</div><div class="d-title">${d.title}</div>`;
+        c.onclick = () => openLaci(d.title, d.url); g.appendChild(c);
+      });
+    }
+
+    // Smart Iframe Route
+    function openLaci(t, u) {
+      if(u.includes("drive.google") || u.includes("forms") || u.includes("wa.me")) window.open(u, '_blank');
+      else { document.getElementById('ifTitle').innerText = t; document.getElementById('ifBody').src = u; document.getElementById('sysIframe').style.display = 'flex'; }
+    }
+    function closeIframe() { document.getElementById('sysIframe').style.display = 'none'; document.getElementById('ifBody').src = ""; }
+
+    // Settings
+    function openSettings() {
+      switchV('vSet'); const l = document.getElementById('sList'); l.innerHTML = "";
+      uData.drw.forEach((d, i) => {
+        const div = document.createElement('div'); div.className = "list-item";
+        div.innerHTML = `<span>${d.icon} ${d.title}</span><span class="remove" onclick="delDrawer(${i})">Hapus</span>`;
+        l.appendChild(div);
+      });
+    }
+    function addDrawer() {
+      askPop("Yakin tambah laci baru?", () => {
+        uData.drw.push({ id: "d_"+Date.now(), title: document.getElementById('sTitle').value, icon: document.getElementById('sIcon').value||"📁", color: document.getElementById('sColor').value, url: document.getElementById('sUrl').value });
+        saveLoc(); runSync(); openSettings();
+      });
+    }
+    function delDrawer(i) { askPop("Yakin hapus laci ini?", () => { uData.drw.splice(i,1); saveLoc(); runSync(); openSettings(); }); }
+
+    // Agenda & Gcal
+    function openAgenda() {
+      switchV('vAgenda'); const l = document.getElementById('aList'); l.innerHTML = "";
+      uData.agn.forEach((a, i) => {
+        const div = document.createElement('div'); div.className = "list-item";
+        div.innerHTML = `<div><b>${a.title}</b><br><small>${a.date} | ${a.time}</small></div><span class="remove" onclick="delAgenda(${i})">Hapus</span>`;
+        l.appendChild(div);
+      });
+    }
+    function addAgenda() {
+      askPop("Yakin tambah jadwal ke G-Calendar?", () => {
+        const t = document.getElementById('aTitle').value, d = document.getElementById('aDate').value, tm = document.getElementById('aTime').value, n = document.getElementById('aNote').value;
+        uData.agn.push({ id: "a_"+Date.now(), title: t, date: d, time: tm, notes: n }); saveLoc(); runSync(); openAgenda();
+        const gDate = d.replace(/-/g, '') + 'T' + tm.replace(':', '') + '00';
+        window.open(`https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(t)}&dates=${gDate}/${gDate}&details=${encodeURIComponent(n)}`, '_blank');
+      });
+    }
+    function delAgenda(i) { askPop("Yakin hapus agenda?", () => { uData.agn.splice(i,1); saveLoc(); runSync(); openAgenda(); }); }
+
+    // CV Maker
+    function openCV() { switchV('vCV'); rendCV(); }
+    function addCV(t) { const v = document.getElementById('cv'+t+'_in').value; if(v){ uData.cv[t].push(v); document.getElementById('cv'+t+'_in').value=""; saveLoc(); rendCV(); } }
+    function rmCV(t, i) { uData.cv[t].splice(i,1); saveLoc(); rendCV(); }
+    function rendCV() {
+      ['E','O','S'].forEach(t => {
+        const l = document.getElementById('cv'+t+'_lst'); l.innerHTML = "";
+        uData.cv[t].forEach((v,i) => {
+          const d = document.createElement('div'); d.className = "list-item";
+          d.innerHTML = `<span>${v}</span><span class="remove" onclick="rmCV('${t}',${i})">x</span>`; l.appendChild(d);
+        });
+      });
+    }
+    function printCV() {
+      askPop("Cetak CV Sekarang?", () => {
+        const ph = localStorage.getItem("p_"+cUser) || "";
+        document.getElementById('printArea').innerHTML = `
+          <div class="cv-h"><div><div class="cv-title">CURRICULUM VITAE</div><div style="font-size:18px; margin-top:5px;"><b>${uData.pro.fullName}</b></div></div>${ph ? `<img class="cv-photo" src="${ph}">` : 'Tanpa Foto'}</div>
+          <div class="cv-sec">Identitas Pegawai</div>
+          <table class="cv-tbl">
+            <tr><td width="150"><b>NIP</b></td><td>: ${uData.pro.nip}</td></tr>
+            <tr><td><b>Instansi</b></td><td>: ${uData.pro.schoolName}</td></tr>
+            <tr><td><b>Kepala Sekolah</b></td><td>: ${uData.pro.headmasterName} (NIP: ${uData.pro.headmasterNip})</td></tr>
+            <tr><td><b>Tahun Ajaran</b></td><td>: ${uData.pro.academicYear} | Sem: ${uData.pro.semester}</td></tr>
+          </table>
+          <div class="cv-sec">Riwayat Pendidikan</div><ul>${uData.cv.E.map(i=>`<li>${i}</li>`).join('')}</ul>
+          <div class="cv-sec">Pengalaman Organisasi</div><ul>${uData.cv.O.map(i=>`<li>${i}</li>`).join('')}</ul>
+          <div class="cv-sec">Prestasi & Keahlian</div><ul>${uData.cv.S.map(i=>`<li>${i}</li>`).join('')}</ul>
+          <div style="margin-top:40px; text-align:right; font-size:12px;">Dibuat Otomatis Sistem Asisten Guru<br>&copy; 2026 3D Creative</div>
+        `; window.print();
+      });
+    }
+
+    // Local / Cloud Storage Logic
+    function saveLoc() { localStorage.setItem("d_"+cUser, JSON.stringify(uData)); }
+    function loadLoc() { const d = localStorage.getItem("d_"+cUser); if(d) { const p = JSON.parse(d); uData.pro = p.pro||{}; uData.drw = p.drw||[]; uData.agn = p.agn||[]; uData.cv = p.cv||{E:[],O:[],S:[]}; } }
+    function doLogout() { localStorage.removeItem("ag_user"); cUser=null; switchV('vAuth'); }
+    
+    function runSyncProfile() { if(!navigator.onLine) return; fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "saveProfile", payload: uData.pro }) }); }
+    function runSync() { if(!navigator.onLine || !cUser) return; fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "syncData", payload: { username: cUser, drawers: uData.drw, agendas: uData.agn } }) }); }
+  </script>
+
+  <script>
+    if('serviceWorker' in navigator) {
+      window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js'); });
+    }
+  </script>
 </body>
 </html>
