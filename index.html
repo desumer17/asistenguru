@@ -9,7 +9,6 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Noto Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
         
-        /* 1. GRADASI LATAR BELAKANG ELEGAN */
         body { 
             background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); 
             background-attachment: fixed;
@@ -32,7 +31,6 @@
         .app-view.active { display: flex; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* HEADER GRADASI DEEP OCEAN */
         .header-container { 
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); 
             color: white; padding: 30px 24px 40px 24px; 
@@ -52,28 +50,23 @@
         }
         .icon-btn:hover { background: rgba(255, 255, 255, 0.4); transform: translateY(-2px); }
 
-        /* 2. MENU GRID & ANIMASI MELAYANG */
         .menu-container { background: white; margin: -20px 20px 20px 20px; border-radius: 20px; padding: 24px 16px; box-shadow: 0 8px 25px rgba(0,0,0,0.06); z-index: 10; }
         .grid-row { display: grid; grid-template-columns: repeat(4, 1fr); row-gap: 24px; column-gap: 12px; }
         
         .grid-item { display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; }
         .grid-item p { font-size: 11px; font-weight: 600; color: #4a4a4a; line-height: 1.3; margin-top: 8px; transition: color 0.3s; }
         
-        /* Box Ikon dengan Animasi */
         .icon-box { 
             width: 55px; height: 55px; border-radius: 18px; display: flex; align-items: center; justify-content: center; 
             font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); 
         }
         
-        /* Efek Hover (Melayang Naik & Bayangan Membesar) */
         .grid-item:hover .icon-box { transform: translateY(-6px) scale(1.08); box-shadow: 0 12px 20px rgba(0,0,0,0.12); }
         .grid-item:hover p { color: #1e3c72; }
         
-        /* Efek Klik (Membal ke bawah) */
         .grid-item:active .icon-box { transform: scale(0.92); box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: all 0.1s; }
 
-        /* Warna Ikon */
         .bg-green { background: linear-gradient(135deg, #e8f5e9, #c8e6c9); color: #2e7d32; }
         .bg-blue { background: linear-gradient(135deg, #e3f2fd, #bbdefb); color: #1565c0; }
         .bg-orange { background: linear-gradient(135deg, #fff3e0, #ffe0b2); color: #e65100; }
@@ -81,7 +74,6 @@
         .bg-teal { background: linear-gradient(135deg, #e0f2f1, #b2dfdb); color: #00695c; }
         .bg-red { background: linear-gradient(135deg, #ffebee, #ffcdd2); color: #c62828; }
 
-        /* Form Layout */
         .auth-container { padding: 40px 28px; }
         .form-group { margin-bottom: 16px; }
         .form-group label { display: block; font-size: 12px; font-weight: 700; color: #555; margin-bottom: 6px; }
@@ -150,14 +142,14 @@
                 <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
                     <h3 style="font-size: 14px; color: #1e3c72; margin-bottom: 5px;" id="sekolahNameDisplay">SD Negeri 17 Dauh Puri</h3>
                     <p style="font-size: 12px; color: #777;">Kepala Sekolah: <span id="kepsekNameDisplay">-</span></p>
-                    <p style="font-size: 11px; color: #999; margin-top: 15px;">Asisten Guru © 2026</p>
+                    <p style="font-size: 11px; color: #1e3c72; margin-top: 15px; font-weight: 700;">Hak Cipta &copy; 2026 3D Creative</p>
                 </div>
             </div>
         </div>
 
         <div id="profileView" class="app-view auth-container" style="overflow-y: auto;">
             <div style="display: flex; align-items: center; margin-bottom: 25px;">
-                <button onclick="switchView('dashboardView')" style="background:none;border:none;font-size:24px;margin-right:10px;cursor:pointer;">←</button>
+                <button onclick="switchView('dashboardView')" style="background:none;border:none;font-size:24px;margin-right:10px;cursor:pointer;color:#1e3c72;">←</button>
                 <h2 style="color: #1e3c72; font-size: 20px; font-weight: 800;">Pengaturan Profil</h2>
             </div>
             
@@ -184,7 +176,7 @@
     </div>
 
     <script>
-        // ⚠️ PASTE URL WEB APP BARU DI SINI
+        // ⚠️ PASTE URL WEB APP APPS SCRIPT BOS DI SINI
         const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyjI4XjBdwbRYR-zx9JeLsxYHc9DqcrZkjgxKdS5sKa04hfQzPXPxZ6inlH8rLbv9P-/exec";
 
         window.onload = function() {
@@ -197,7 +189,6 @@
             }
         };
 
-        // ... Sisa JavaScript sama persis seperti sebelumnya ...
         function switchView(viewId) {
             document.querySelectorAll('.app-view').forEach(v => v.classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
