@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asisten Guru - SD Negeri 17 Dauh Puri</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a73e8">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Noto Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: #f0f2f5; color: #333333; min-height: 100vh; }
+        .app-container { width: 100%; max-width: 480px; margin: 0 auto; min-height: 100vh; background-color: #f4f6f9; box-shadow: 0 0 20px rgba(0,0,0,0.1); position: relative; display: flex; flex-direction: column; }
+        @media (min-width: 768px) {
+            body { background: linear-gradient(120deg, #e0e8f5 0%, #b8d0f5 100%); }
+            .app-container { max-width: 900px; margin: 30px auto; min-height: calc(100vh - 60px); border-radius: 16px; overflow: hidden; }
+            .grid-row { grid-template-columns: repeat(4, 1fr) !important; gap: 24px !important; }
+            .dashboard-layout { display: grid; grid-template-columns: 1.8fr 1.2fr; gap: 20px; padding: 0 24px 40px 24px !important; }
+            .content-section { padding: 0 !important; }
+            .header-container { padding: 30px 30px 40px 30px !important; }
+        }
+        .app-view { display: none; width: 100%; flex-direction: column; flex-grow: 1; }
+        .app-view.active { display: flex; }
+        
+        /* Auth Screen */
+        .auth-container { padding: 40px 28px; background: white; flex-grow: 1; justify-content: center; }
+        .auth-header { text-align: center; margin-bottom: 30px; }
+        .auth-header h2 { font-size: 22px; color: #1a73e8; font-weight: 700; }
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+        .form-group input { width: 100%; padding: 12px 14px; border: 1.5px solid #dadce0; border-radius: 8px; font-size: 14px; outline: none; }
+        .form-group input:focus { border-color: #1a73e8; }
+        .btn-primary { background-color: #1a73e8; color: white; border: none; padding: 14px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 10px; }
+        .auth-switch { text-align: center; margin-top: 20px; font-size: 13px; color: #5f6368; }
+        .auth-switch span { color: #1a73e8; cursor: pointer; font-weight: 600; }
+
+        /* Dashboard Area */
+        .header-container { background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%); color: white; padding: 24px 20px 35px 20px; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px; }
+        .user-profile-section { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .welcome-text h1 { font-size: 18px; font-weight: 700; }
+        .icon-btn { background: rgba(255, 255, 255, 0.15); border: none; width: 38px; height: 38px; border-radius: 50%; color: white; cursor: pointer; }
+        .menu-container { background: white; margin: -15px 16px 20px 16px; border-radius: 16px; padding: 20px 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.04); z-index: 10; }
+        .grid-row { display: grid; grid-template-columns: repeat(4, 1fr); row-gap: 20px; column-gap: 8px; }
+        
+        /* Ikon Dinamis */
+        .grid-item { display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; transition: transform 0.15s ease; }
+        .grid-item:active { transform: scale(0.92); }
+        .icon-box { width: 50px; height: 50px; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; box-shadow: 0 3px 8px rgba(0,0,0,0.05); font-size: 20px; }
+        .grid-item p { font-size: 11px; font-weight: 500; color: #4a4a4a; line-height: 1.2; }
+
+        /* Pengatur Gradasi Warna Ikon */
+        .bg-green { background: linear-gradient(135deg, #e8f5e9, #c8e6c9); color: #2e7d32; }
+        .bg-blue { background: linear-gradient(135deg, #e3f2fd, #bbdefb); color: #1565c0; }
+        .bg-orange { background: linear-gradient(135deg, #fff3e0, #ffe0b2); color: #e65100; }
+        .bg-purple { background: linear-gradient(135deg, #f3e5f5, #e1bee7); color: #6a1b9a; }
+        .bg-teal { background: linear-gradient(135deg, #e0f2f1, #b2dfdb); color: #00695c; }
+        .bg-red { background: linear-gradient(135deg, #ffebee, #ffcdd2); color: #c62828; }
+
+        .content-section { padding: 0 16px 40px 16px; }
+        .card { background: white; border-radius: 14px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+        .loading-overlay { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.9); z-index: 100; align-items: center; justify-content: center; font-weight: 600; color: #1a73e8; }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div id="loadingView" class="loading-overlay"><p>Sinkronisasi Data...</p></div>
+
+        <div id="registerView" class="app-view auth-container">
+            <div class="auth-header"><h2>Pendaftaran Akun</h2><p>SD Negeri 17 Dauh Puri</p></div>
+            <form onsubmit="handleRegister(event)">
+                <div class="form-group"><label>Nama & Gelar</label><input type="text" id="regNama" required></div>
+                <div class="form-group"><label>NIP</label><input type="number" id="regNip" required></div>
+                <div class="form-group"><label>Username</label><input type="text" id="regUser" required></div>
+                <div class="form-group"><label>Password</label><input type="password" id="regPass" required></div>
+                <button type="submit" class="btn-primary">Daftar</button>
+            </form>
+            <div class="auth-switch">Sudah ada akun? <span onclick="switchView('loginView')">Login</span></div>
+        </div>
+
+        <div id="loginView" class="app-view auth-container">
+            <div class="auth-header"><h2>Asisten Guru Portal</h2><p>Silakan masuk ke lemari kerja Anda</p></div>
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group"><label>Username</label><input type="text" id="loginUser" required></div>
+                <div class="form-group"><label>Password</label><input type="password" id="loginPass" required></div>
+                <button type="submit" class="btn-primary">Masuk</button>
+            </form>
+            <div class="auth-switch">Belum terdaftar? <span onclick="switchView('registerView')">Buat Akun</span></div>
+        </div>
+
+        <div id="dashboardView" class="app-view">
+            <div class="header-container">
+                <div class="user-profile-section">
+                    <div class="welcome-text"><h2>Selamat Tugas,</h2><h1 id="activeTeacherName">Guru</h1></div>
+                    <button class="icon-btn" onclick="logout()">🚪</button>
+                </div>
+            </div>
+
+            <div class="menu-container">
+                <div class="grid-row" id="menuGridContainer">
+                    </div>
+            </div>
+
+            <div class="content-section">
+                <div class="card">
+                    <p style="font-size: 13px; color: #666; text-align: center;">Semua modul di atas dikendalikan via awan Google Sheets SD Negeri 17 Dauh Puri.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // MASUKKAN URL DEPLOYMENT WEB APP APPS SCRIPTMU DI SINI, BOS!
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyjI4XjBdwbRYR-zx9JeLsxYHc9DqcrZkjgxKdS5sKa04hfQzPXPxZ6inlH8rLbv9P-/exec";
+
+        window.onload = function() {
+            const savedTeacher = localStorage.getItem('teacherName');
+            if (savedTeacher) {
+                document.getElementById('activeTeacherName').innerText = savedTeacher;
+                switchView('dashboardView');
+                muatLaciDinamis(); // Ambil menu terbaru dari Google Sheet
+            } else {
+                switchView('loginView');
+            }
+        };
+
+        function switchView(viewId) {
+            document.querySelectorAll('.app-view').forEach(view => view.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+        }
+
+        // AMBIL DATA KOTAK MENU DARI SHEET 2 (DATALACI)
+        function muatLaciDinamis() {
+            if(APPS_SCRIPT_URL.includes("SILAKAN_PASTE")) return renderSimulasi();
+            
+            fetch(`${APPS_SCRIPT_URL}?action=get_laci`)
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === "success") {
+                    renderTombolMenu(data.menu);
+                }
+            });
+        }
+
+        // RENDER ELEMEN HTML SECARA OTOMATIS
+        function renderTombolMenu(arrayMenu) {
+            const container = document.getElementById('menuGridContainer');
+            container.innerHTML = ""; // Bersihkan kontainer lama
+
+            if(arrayMenu.length === 0) {
+                container.innerHTML = "<p style='grid-column: span 4; font-size:12px; color:#999;'>Belum ada laci di Google Sheet.</p>";
+                return;
+            }
+
+            arrayMenu.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = "grid-item";
+                // Mengirimkan parameter nama guru aktif ke laci (SSO sederhana)
+                const namaGuru = localStorage.getItem('teacherName');
+                const urlTujuan = `${item.url}?guru=${encodeURIComponent(namaGuru)}`;
+                
+                itemDiv.onclick = () => window.open(urlTujuan, '_blank');
+
+                itemDiv.innerHTML = `
+                    <div class="icon-box ${item.warna}">${item.ikon}</div>
+                    <p>${item.nama}</p>
+                `;
+                container.appendChild(itemDiv);
+            });
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const user = document.getElementById('loginUser').value;
+            const pass = document.getElementById('loginPass').value;
+            showLoading(true);
+
+            if(APPS_SCRIPT_URL.includes("SILAKAN_PASTE")) {
+                setTimeout(() => { showLoading(false); localStorage.setItem('teacherName', "Guru Simulasi"); document.getElementById('activeTeacherName').innerText = "Guru Simulasi"; switchView('dashboardView'); renderSimulasi(); }, 800);
+                return;
+            }
+
+            fetch(`${APPS_SCRIPT_URL}?action=login&username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}`)
+            .then(res => res.json())
+            .then(data => {
+                showLoading(false);
+                if (data.status === "success") {
+                    localStorage.setItem('teacherName', data.nama);
+                    document.getElementById('activeTeacherName').innerText = data.nama;
+                    switchView('dashboardView');
+                    renderTombolMenu(data.menu); // Langsung render menu bawaan hasil login
+                } else {
+                    alert("Kredensial Guru salah atau belum terdaftar!");
+                }
+            }).catch(() => { showLoading(false); alert("Gagal menyambung ke awan."); });
+        }
+
+        function handleRegister(e) {
+            e.preventDefault();
+            const nama = document.getElementById('regNama').value;
+            const nip = document.getElementById('regNip').value;
+            const user = document.getElementById('regUser').value;
+            const pass = document.getElementById('regPass').value;
+            showLoading(true);
+
+            if(APPS_SCRIPT_URL.includes("SILAKAN_PASTE")) {
+                setTimeout(() => { showLoading(false); alert("Pendaftaran Simulasi Sukses!"); switchView('loginView'); }, 800);
+                return;
+            }
+
+            const payload = new URLSearchParams();
+            payload.append('action', 'register');
+            payload.append('nama', nama);
+            payload.append('nip', nip);
+            payload.append('username', user);
+            payload.append('password', pass);
+
+            fetch(APPS_SCRIPT_URL, { method: 'POST', body: payload })
+            .then(res => res.json())
+            .then(data => {
+                showLoading(false);
+                if(data.status === "success") { alert("Sukses mendaftar! Data masuk Sheet1."); switchView('loginView'); }
+                else { alert(data.message); }
+            }).catch(() => { showLoading(false); alert("Gagal mengirim data."); });
+        }
+
+        function logout() { localStorage.clear(); switchView('loginView'); }
+        function showLoading(status) { document.getElementById('loadingView').style.color = "#1a73e8"; document.getElementById('loadingView').style.display = status ? 'flex' : 'none'; }
+
+        // Generator Menu Cadangan Jika URL Apps Script Belum Terpasang (Biar Bos Bisa Tes Tampilan)
+        function renderSimulasi() {
+            const menuSimulasi = [
+                {"nama": "Absensi Siswa", "ikon": "📝", "warna": "bg-green", "url": "#"},
+                {"nama": "Jurnal Kelas", "ikon": "📘", "warna": "bg-blue", "url": "#"},
+                {"nama": "Input Nilai", "ikon": "📊", "warna": "bg-orange", "url": "#"},
+                {"nama": "Tambah Laci Baru", "ikon": "➕", "warna": "bg-purple", "url": "https://docs.google.com"}
+            ];
+            renderTombolMenu(menuSimulasi);
+        }
+    </script>
+</body>
+</html>
