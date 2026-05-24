@@ -136,7 +136,7 @@
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     .loading-text { font-size: 15px; font-weight: bold; letter-spacing: 1px; color: #dfb15b; }
 
-    /* A4 CV Print CSS */
+    /* A4 CV Print CSS (LOGIKA FIX DISPLAY BLOCK DIBAWAH) */
     @media print {
       body * { visibility: hidden; }
       #printArea { display: block !important; visibility: visible; position: absolute; left: 0; top: 0; width: 210mm; padding: 15mm; background: #fff; color: #000; font-family: 'Times New Roman', serif; }
@@ -297,7 +297,7 @@
     let cUser = null;
     let uData = { pro: {}, drw: [], agn: [], cv: [] }; 
     let popCB = null;
-    let isSubmitting = false; 
+    let isSubmitting = false; // PERBAIKAN: Kunci gembok Anti-Double Click
 
     // --- MESIN TEMA (DARK/LIGHT MODE) ---
     function updateThemeIcon() {
@@ -338,7 +338,7 @@
 
     // --- REGISTER AKUN (HARD LOCK ANTI-DUPLIKASI) ---
     function doReg() {
-      if (isSubmitting) return;
+      if (isSubmitting) return; // Jika sedang memproses, blokir klik selanjutnya
       if(!navigator.onLine) return alert("Pendaftaran butuh internet.");
       
       const u = document.getElementById('rUser').value.trim();
@@ -346,7 +346,7 @@
       const n = document.getElementById('rName').value.trim();
       if(!u || !p || !n) return alert("Semua kolom pendaftaran wajib diisi!");
 
-      // Hard-lock tombol & state secepat kilat sebelum request meluncur
+      // Kunci tombol seketika saat diklik
       isSubmitting = true;
       const btn = document.getElementById('btnSubmitReg');
       btn.disabled = true;
@@ -359,12 +359,11 @@
       })
       .then(r => r.json()).then(d => {
         alert(d.message); 
-        if(d.status === "success") {
-          toggleA(true); 
-        }
+        if(d.status === "success") { toggleA(true); }
       })
       .catch(e => { alert("Terjadi kesalahan jaringan."); })
       .finally(() => {
+        // Buka kembali kunci setelah selesai
         isSubmitting = false;
         btn.disabled = false;
         btn.innerText = "DAFTAR AKUN";
@@ -374,7 +373,7 @@
 
     // --- LOGIN AKUN (HARD LOCK ANTI-DUPLIKASI) ---
     function doLogin() {
-      if (isSubmitting) return;
+      if (isSubmitting) return; // Blokir klik ganda
       const u = document.getElementById('lUser').value.trim();
       const p = document.getElementById('lPass').value.trim();
       if(!u || !p) return alert("Username dan Password wajib diisi!");
@@ -545,7 +544,7 @@
       });
     }
 
-    // --- CETAK CV A4 FIXED ---
+    // --- CETAK CV A4 FIXED (LOGIKA ANTI BLANK) ---
     function printCV() {
       askPop("Cetak CV Sekarang?", () => {
         const ph = localStorage.getItem("p_"+cUser) || "";
@@ -592,19 +591,32 @@
         uData.pro = p.pro || {}; 
         uData.drw = p.drw || []; 
         uData.agn = p.agn || []; 
-        uData.cv = p.cv || [];
+        
+        // PERBAIKAN DIKEMBALIKAN: MIGRATOR CERDAS UNTUK CV LAMA (DARI INDEX 11)
+        if (p.cv && typeof p.cv === 'object' && !Array.isArray(p.cv)) {
+          let newCV = [];
+          if (p.cv.E && p.cv.E.length > 0) newCV.push({ cat: "Pendidikan", items: p.cv.E });
+          if (p.cv.O && p.cv.O.length > 0) newCV.push({ cat: "Organisasi", items: p.cv.O });
+          if (p.cv.S && p.cv.S.length > 0) newCV.push({ cat: "Prestasi/Keahlian", items: p.cv.S });
+          uData.cv = newCV;
+        } else {
+          uData.cv = p.cv || [];
+        }
       } 
     }
     
-    // --- FIX LOGOUT ---
+    // --- FIX LOGOUT: MEMBERSIHKAN INPUT ELEMENT SECARA TOTAL ---
     function doLogout() { 
       localStorage.removeItem("ag_user"); 
       cUser = null; 
+      
+      // Kosongkan form login & register agar tidak disalahgunakan orang lain
       document.getElementById('lUser').value = "";
       document.getElementById('lPass').value = "";
       document.getElementById('rName').value = "";
       document.getElementById('rUser').value = "";
       document.getElementById('rPass').value = "";
+      
       switchV('vAuth'); 
     }
     
