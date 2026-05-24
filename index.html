@@ -80,6 +80,7 @@
     /* Buttons */
     .btn { width: 100%; padding: 15px; border-radius: 12px; font-weight: bold; font-size: 15px; border: none; cursor: pointer; color: var(--btn-text); transition: var(--trans); }
     .btn:active { transform: scale(0.97); }
+    .btn:disabled { background: #555 !important; color: #aaa !important; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
     .btn-gold { background: linear-gradient(135deg, var(--color-gold), #b8860b); box-shadow: 0 4px 15px rgba(223, 177, 91, 0.3); }
     .btn-orange { background: linear-gradient(135deg, var(--color-orange), #ff5722); box-shadow: 0 4px 15px rgba(255, 122, 69, 0.3); }
     .btn-gray { background: var(--bg-input); color: var(--text-primary); border: 1px solid var(--card-border); box-shadow: none; }
@@ -135,7 +136,7 @@
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     .loading-text { font-size: 15px; font-weight: bold; letter-spacing: 1px; color: #dfb15b; }
 
-    /* A4 CV Print CSS (LOGIKA FIX DISPLAY NONE DIBAWAH) */
+    /* A4 CV Print CSS */
     @media print {
       body * { visibility: hidden; }
       #printArea { display: block !important; visibility: visible; position: absolute; left: 0; top: 0; width: 210mm; padding: 15mm; background: #fff; color: #000; font-family: 'Times New Roman', serif; }
@@ -190,7 +191,7 @@
     <div class="card" id="cLogin">
       <div class="form-group"><label>Username</label><input type="text" class="input" id="lUser"></div>
       <div class="form-group"><label>Password</label><input type="password" class="input" id="lPass"></div>
-      <button class="btn btn-gold" onclick="doLogin()">LOGIN</button>
+      <button class="btn btn-gold" id="btnSubmitLogin" onclick="doLogin()">LOGIN</button>
       <div class="toggle-auth">Belum punya akun? <span onclick="toggleA(false)">Daftar</span></div>
     </div>
 
@@ -198,7 +199,7 @@
       <div class="form-group"><label>Nama Lengkap</label><input type="text" class="input" id="rName"></div>
       <div class="form-group"><label>Username</label><input type="text" class="input" id="rUser"></div>
       <div class="form-group"><label>Password</label><input type="password" class="input" id="rPass"></div>
-      <button class="btn btn-orange" onclick="doReg()">DAFTAR AKUN</button>
+      <button class="btn btn-orange" id="btnSubmitReg" onclick="doReg()">DAFTAR AKUN</button>
       <div class="toggle-auth">Sudah punya akun? <span onclick="toggleA(true)">Login</span></div>
     </div>
   </div>
@@ -220,7 +221,7 @@
       <div class="form-group"><label>NIP Kepala Sekolah</label><input type="text" class="input" id="oKepsekNip"></div>
       <div class="form-group"><label>Semester</label><select class="input" id="oSem"><option>1 (Ganjil)</option><option>2 (Genap)</option></select></div>
       <div class="form-group"><label>Tahun Pelajaran</label><input type="text" class="input" id="oYear"></div>
-      <button class="btn btn-gold" onclick="saveOnboard()">SIMPAN IDENTITAS</button>
+      <button class="btn btn-gold" id="btnSubmitOnboard" onclick="saveOnboard()">SIMPAN IDENTITAS</button>
     </div>
   </div>
 
@@ -248,7 +249,7 @@
       <div class="form-group"><label>Tanggal</label><input type="date" class="input" id="aDate"></div>
       <div class="form-group"><label>Waktu</label><input type="time" class="input" id="aTime"></div>
       <div class="form-group"><label>Catatan</label><input type="text" class="input" id="aNote"></div>
-      <button class="btn btn-orange" onclick="addAgenda()">TAMBAH & BUKA ALARM GCAL</button>
+      <button class="btn btn-orange" id="btnSubmitAgenda" onclick="addAgenda()">TAMBAH & BUKA ALARM GCAL</button>
     </div>
     <div class="card"><label>Daftar Agenda Aktif</label><div id="aList"></div></div>
     <button class="btn btn-gray" onclick="switchV('vDash')">Kembali</button>
@@ -261,7 +262,7 @@
       <div class="form-group"><label>Emoji Ikon</label><input type="text" class="input" id="sIcon" placeholder="📁"></div>
       <div class="form-group"><label>Warna Aksen</label><input type="color" class="input" id="sColor" value="#dfb15b" style="padding:0; height:40px;"></div>
       <div class="form-group"><label>URL Laci</label><input type="url" class="input" id="sUrl"></div>
-      <button class="btn btn-gold" onclick="addDrawer()">TAMBAH LACI</button>
+      <button class="btn btn-gold" id="btnSubmitDrawer" onclick="addDrawer()">TAMBAH LACI</button>
     </div>
     <div class="card"><label>Laci Terpasang</label><div id="sList"></div></div>
     <button class="btn btn-gray" style="margin-bottom:10px;" onclick="switchV('vOnboard')">Edit Identitas</button>
@@ -296,7 +297,7 @@
     let cUser = null;
     let uData = { pro: {}, drw: [], agn: [], cv: [] }; 
     let popCB = null;
-    let isSubmitting = false; // LOCK DOUBLE SUBMIT ANTI DUPLIKASI DATA SHEET
+    let isSubmitting = false; 
 
     // --- MESIN TEMA (DARK/LIGHT MODE) ---
     function updateThemeIcon() {
@@ -335,7 +336,7 @@
     function showLoading(text) { document.getElementById('loadingText').innerText = text || "Memproses..."; document.getElementById('sysLoading').style.display = 'flex'; }
     function hideLoading() { document.getElementById('sysLoading').style.display = 'none'; }
 
-    // --- REGISTER AKUN (WITH LOCK GUARD) ---
+    // --- REGISTER AKUN (HARD LOCK ANTI-DUPLIKASI) ---
     function doReg() {
       if (isSubmitting) return;
       if(!navigator.onLine) return alert("Pendaftaran butuh internet.");
@@ -345,24 +346,33 @@
       const n = document.getElementById('rName').value.trim();
       if(!u || !p || !n) return alert("Semua kolom pendaftaran wajib diisi!");
 
+      // Hard-lock tombol & state secepat kilat sebelum request meluncur
       isSubmitting = true;
+      const btn = document.getElementById('btnSubmitReg');
+      btn.disabled = true;
+      btn.innerText = "MEMPROSES...";
       showLoading("Mendaftarkan akun ke Server...");
+
       fetch(APPS_SCRIPT_URL, { 
         method: 'POST', 
         body: JSON.stringify({ action: "register", payload: { username: u, password: p, fullName: n }}) 
       })
       .then(r => r.json()).then(d => {
         alert(d.message); 
-        if(d.status === "success") toggleA(true); 
+        if(d.status === "success") {
+          toggleA(true); 
+        }
       })
       .catch(e => { alert("Terjadi kesalahan jaringan."); })
       .finally(() => {
         isSubmitting = false;
+        btn.disabled = false;
+        btn.innerText = "DAFTAR AKUN";
         hideLoading();
       });
     }
 
-    // --- LOGIN AKUN (WITH LOCK GUARD) ---
+    // --- LOGIN AKUN (HARD LOCK ANTI-DUPLIKASI) ---
     function doLogin() {
       if (isSubmitting) return;
       const u = document.getElementById('lUser').value.trim();
@@ -375,7 +385,11 @@
       }
 
       isSubmitting = true;
+      const btn = document.getElementById('btnSubmitLogin');
+      btn.disabled = true;
+      btn.innerText = "MENCENTANG...";
       showLoading("Mencocokkan data login...");
+
       fetch(APPS_SCRIPT_URL, { 
         method: 'POST', 
         body: JSON.stringify({ action: "login", payload: { username: u, password: p }}) 
@@ -390,6 +404,8 @@
       .catch(e => { alert("Terjadi kesalahan jaringan atau server."); })
       .finally(() => {
         isSubmitting = false;
+        btn.disabled = false;
+        btn.innerText = "LOGIN";
         hideLoading();
       });
     }
@@ -416,6 +432,7 @@
       const ph = localStorage.getItem("p_"+cUser); if(ph) document.getElementById('oPhoto').innerHTML = `<img src="${ph}">`;
     }
     function saveOnboard() {
+      if(isSubmitting) return;
       askPop("Yakin data pegawai sudah benar?", () => {
         uData.pro = { username: cUser, fullName: document.getElementById('oName').value, nip: document.getElementById('oNip').value, schoolName: document.getElementById('oSchool').value, headmasterName: document.getElementById('oKepsek').value, headmasterNip: document.getElementById('oKepsekNip').value, semester: document.getElementById('oSem').value, academicYear: document.getElementById('oYear').value, onboarded: true };
         saveLoc(); runSyncProfile(); switchV('vDash'); renderDash();
@@ -528,7 +545,7 @@
       });
     }
 
-    // --- CETAK CV A4 FIXED (LOGIKA ANTI BLANK) ---
+    // --- CETAK CV A4 FIXED ---
     function printCV() {
       askPop("Cetak CV Sekarang?", () => {
         const ph = localStorage.getItem("p_"+cUser) || "";
@@ -575,46 +592,36 @@
         uData.pro = p.pro || {}; 
         uData.drw = p.drw || []; 
         uData.agn = p.agn || []; 
-        
-        if (p.cv && typeof p.cv === 'object' && !Array.isArray(p.cv)) {
-          let newCV = [];
-          if (p.cv.E && p.cv.E.length > 0) newCV.push({ cat: "Pendidikan", items: p.cv.E });
-          if (p.cv.O && p.cv.O.length > 0) newCV.push({ cat: "Organisasi", items: p.cv.O });
-          if (p.cv.S && p.cv.S.length > 0) newCV.push({ cat: "Prestasi/Keahlian", items: p.cv.S });
-          uData.cv = newCV;
-        } else {
-          uData.cv = p.cv || [];
-        }
+        uData.cv = p.cv || [];
       } 
     }
     
-    // --- FIX LOGOUT: MEMBERSIHKAN INPUT ELEMENT SECARA TOTAL ---
+    // --- FIX LOGOUT ---
     function doLogout() { 
       localStorage.removeItem("ag_user"); 
       cUser = null; 
-      
-      // Kosongkan form login & register agar tidak disalahgunakan orang lain
       document.getElementById('lUser').value = "";
       document.getElementById('lPass').value = "";
       document.getElementById('rName').value = "";
       document.getElementById('rUser').value = "";
       document.getElementById('rPass').value = "";
-      
       switchV('vAuth'); 
     }
     
     function runSyncProfile() { 
       if(!navigator.onLine) return; 
+      isSubmitting = true;
       showLoading("Menyimpan Identitas ke Cloud...");
       fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "saveProfile", payload: uData.pro }) })
-      .then(() => hideLoading()).catch(() => hideLoading()); 
+      .then(() => hideLoading()).catch(() => hideLoading()).finally(() => { isSubmitting = false; }); 
     }
     
     function runSync() { 
       if(!navigator.onLine || !cUser) return; 
+      isSubmitting = true;
       showLoading("Sinkronisasi Data...");
       fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "syncData", payload: { username: cUser, drawers: uData.drw, agendas: uData.agn } }) })
-      .then(() => hideLoading()).catch(() => hideLoading()); 
+      .then(() => hideLoading()).catch(() => hideLoading()).finally(() => { isSubmitting = false; }); 
     }
   </script>
 
