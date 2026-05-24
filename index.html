@@ -270,12 +270,20 @@
   </div>
 
   <div class="app-view" id="vCV">
-    <div class="title">CV AUTOMAKER</div><div class="subtitle">Mesin Cetak A4</div>
+    <div class="title">CV AUTOMAKER</div><div class="subtitle">Mesin Cetak A4 Dinamis</div>
     <div class="card">
-      <div class="form-group"><label>Pendidikan</label><input type="text" class="input" id="cvE_in"><button class="btn btn-gray" style="margin-top:5px; padding:8px;" onclick="addCV('E')">+ Tambah</button><div id="cvE_lst" style="margin-top:10px;"></div></div>
-      <div class="form-group"><label>Organisasi</label><input type="text" class="input" id="cvO_in"><button class="btn btn-gray" style="margin-top:5px; padding:8px;" onclick="addCV('O')">+ Tambah</button><div id="cvO_lst" style="margin-top:10px;"></div></div>
-      <div class="form-group"><label>Prestasi/Keahlian</label><input type="text" class="input" id="cvS_in"><button class="btn btn-gray" style="margin-top:5px; padding:8px;" onclick="addCV('S')">+ Tambah</button><div id="cvS_lst" style="margin-top:10px;"></div></div>
-      <button class="btn btn-gold" onclick="printCV()">CETAK / SIMPAN PDF A4</button>
+      
+      <div class="form-group" style="border-bottom: 1px solid var(--card-border); padding-bottom:15px; margin-bottom:15px;">
+        <label>Tambah Bagian/Kategori CV Baru</label>
+        <div style="display:flex; gap:10px;">
+          <input type="text" class="input" id="newCatTitle" placeholder="Misal: Pengalaman Kerja">
+          <button class="btn btn-gray" style="width:auto; padding:0 15px;" onclick="addCVCategory()">+ Buat</button>
+        </div>
+      </div>
+      
+      <div id="cvDynamicContainer"></div>
+
+      <button class="btn btn-gold" style="margin-top:20px;" onclick="printCV()">CETAK / SIMPAN PDF A4</button>
     </div>
     <button class="btn btn-gray" onclick="switchV('vDash')">Kembali</button>
   </div>
@@ -289,7 +297,8 @@
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzamSNAHNkpVaCKoTj6YSrQOIUceDg87HaD5jnvjCPeXiw-UKcahnwsp5f3dkOnOkT-cg/exec";
 
     let cUser = null;
-    let uData = { pro: {}, drw: [], agn: [], cv: { E:[], O:[], S:[] } };
+    // Perhatikan struktur 'cv' sekarang menjadi Array kosong [] (Dinamis)
+    let uData = { pro: {}, drw: [], agn: [], cv: [] }; 
     let popCB = null;
 
     // --- MESIN TEMA (DARK/LIGHT MODE) ---
@@ -297,7 +306,6 @@
       const isLight = document.documentElement.getAttribute("data-theme") === "light";
       document.getElementById("themeToggleBtn").innerText = isLight ? "☀️" : "🌙";
     }
-    
     function toggleTheme() {
       const isLight = document.documentElement.getAttribute("data-theme") === "light";
       const newTheme = isLight ? "dark" : "light";
@@ -338,7 +346,6 @@
       .then(r => r.json()).then(d => { hideLoading(); alert(d.message); if(d.status === "success") toggleA(true); })
       .catch(e => { hideLoading(); alert("Terjadi kesalahan jaringan."); });
     }
-    
     function doLogin() {
       const u = document.getElementById('lUser').value, p = document.getElementById('lPass').value;
       if(!navigator.onLine) {
@@ -379,7 +386,6 @@
       ['Name','Nip','School','Kepsek','KepsekNip','Year'].forEach(k => document.getElementById('o'+k).value = uData.pro[k.toLowerCase()] || "");
       const ph = localStorage.getItem("p_"+cUser); if(ph) document.getElementById('oPhoto').innerHTML = `<img src="${ph}">`;
     }
-    
     function saveOnboard() {
       askPop("Yakin data pegawai sudah benar?", () => {
         uData.pro = { username: cUser, fullName: document.getElementById('oName').value, nip: document.getElementById('oNip').value, schoolName: document.getElementById('oSchool').value, headmasterName: document.getElementById('oKepsek').value, headmasterNip: document.getElementById('oKepsekNip').value, semester: document.getElementById('oSem').value, academicYear: document.getElementById('oYear').value, onboarded: true };
@@ -442,42 +448,145 @@
     }
     function delAgenda(i) { askPop("Yakin hapus agenda?", () => { uData.agn.splice(i,1); saveLoc(); runSync(); openAgenda(); }); }
 
-    // --- CV AUTOMAKER ---
+    // --- CV AUTOMAKER (VERSI DINAMIS) ---
     function openCV() { switchV('vCV'); rendCV(); }
-    function addCV(t) { const v = document.getElementById('cv'+t+'_in').value; if(v){ uData.cv[t].push(v); document.getElementById('cv'+t+'_in').value=""; saveLoc(); rendCV(); } }
-    function rmCV(t, i) { uData.cv[t].splice(i,1); saveLoc(); rendCV(); }
-    function rendCV() {
-      ['E','O','S'].forEach(t => {
-        const l = document.getElementById('cv'+t+'_lst'); l.innerHTML = "";
-        uData.cv[t].forEach((v,i) => {
-          const d = document.createElement('div'); d.className = "list-item";
-          d.innerHTML = `<span style="color:var(--text-heading);">${v}</span><span class="remove" onclick="rmCV('${t}',${i})">x</span>`; l.appendChild(d);
-        });
+    
+    // Fungsi Menambah Kategori Baru (misal: Pengalaman Kerja)
+    function addCVCategory() {
+      const t = document.getElementById('newCatTitle').value.trim();
+      if(!t) return;
+      uData.cv.push({ cat: t, items: [] });
+      document.getElementById('newCatTitle').value = "";
+      saveLoc(); rendCV();
+    }
+    
+    // Fungsi Menghapus Kategori
+    function rmCVCategory(cIdx) {
+      askPop("Hapus bagian '" + uData.cv[cIdx].cat + "'?", () => {
+        uData.cv.splice(cIdx, 1); saveLoc(); rendCV();
       });
     }
+    
+    // Fungsi Menambah Item ke Dalam Kategori Spesifik
+    function addCVItem(cIdx) {
+      const inp = document.getElementById('cvInp_' + cIdx);
+      const v = inp.value.trim();
+      if(v) {
+        uData.cv[cIdx].items.push(v);
+        inp.value = "";
+        saveLoc(); rendCV();
+      }
+    }
+    
+    // Fungsi Menghapus Item dari Kategori Spesifik
+    function rmCVItem(cIdx, iIdx) {
+      uData.cv[cIdx].items.splice(iIdx, 1);
+      saveLoc(); rendCV();
+    }
+    
+    // Fungsi Render Tampilan CV Dinamis
+    function rendCV() {
+      const container = document.getElementById('cvDynamicContainer');
+      container.innerHTML = "";
+      
+      uData.cv.forEach((c, cIdx) => {
+        const grp = document.createElement('div');
+        grp.className = "form-group";
+        grp.style.cssText = "background: var(--bg-input); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid var(--card-border); transition: var(--trans);";
+        
+        // Header Kategori
+        let html = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                       <label style="margin:0; color:var(--text-heading); font-size:14px;">${c.cat}</label>
+                       <span class="remove" onclick="rmCVCategory(${cIdx})">Hapus Bagian</span>
+                    </div>`;
+        
+        // Input Item Baru
+        html += `<div style="display:flex; gap:10px; margin-bottom:10px;">
+                   <input type="text" class="input" id="cvInp_${cIdx}" placeholder="Ketik isi di sini...">
+                   <button class="btn btn-gray" style="width:auto; padding:0 15px;" onclick="addCVItem(${cIdx})">+</button>
+                 </div>`;
+                 
+        // Render List Items
+        let listHtml = "";
+        c.items.forEach((item, iIdx) => {
+            listHtml += `<div class="list-item" style="background:var(--bg-card);">
+                           <span style="color:var(--text-heading);">${item}</span>
+                           <span class="remove" onclick="rmCVItem(${cIdx}, ${iIdx})">x</span>
+                         </div>`;
+        });
+        
+        grp.innerHTML = html + listHtml;
+        container.appendChild(grp);
+      });
+    }
+
+    // Fungsi Cetak A4 / PDF (Logika Looping Dinamis)
     function printCV() {
       askPop("Cetak CV Sekarang?", () => {
         const ph = localStorage.getItem("p_"+cUser) || "";
-        document.getElementById('printArea').innerHTML = `
-          <div class="cv-h"><div><div class="cv-title">CURRICULUM VITAE</div><div style="font-size:18px; margin-top:5px;"><b>${uData.pro.fullName}</b></div></div>${ph ? `<img class="cv-photo" src="${ph}">` : 'Tanpa Foto'}</div>
+        
+        // Header Identitas
+        let printHtml = `
+          <div class="cv-h">
+            <div>
+              <div class="cv-title">CURRICULUM VITAE</div>
+              <div style="font-size:18px; margin-top:5px;"><b>${uData.pro.fullName || 'Nama Pegawai'}</b></div>
+            </div>
+            ${ph ? `<img class="cv-photo" src="${ph}">` : '<div style="width:35mm; height:45mm; border:1px solid #000; display:flex; align-items:center; justify-content:center; font-size:10px;">Tanpa Foto</div>'}
+          </div>
           <div class="cv-sec">Identitas Pegawai</div>
           <table class="cv-tbl">
-            <tr><td width="150"><b>NIP</b></td><td>: ${uData.pro.nip}</td></tr>
-            <tr><td><b>Instansi</b></td><td>: ${uData.pro.schoolName}</td></tr>
-            <tr><td><b>Kepala Sekolah</b></td><td>: ${uData.pro.headmasterName} (NIP: ${uData.pro.headmasterNip})</td></tr>
-            <tr><td><b>Tahun Ajaran</b></td><td>: ${uData.pro.academicYear} | Sem: ${uData.pro.semester}</td></tr>
+            <tr><td width="150"><b>NIP</b></td><td>: ${uData.pro.nip || '-'}</td></tr>
+            <tr><td><b>Instansi</b></td><td>: ${uData.pro.schoolName || '-'}</td></tr>
+            <tr><td><b>Kepala Sekolah</b></td><td>: ${uData.pro.headmasterName || '-'} (NIP: ${uData.pro.headmasterNip || '-'})</td></tr>
+            <tr><td><b>Tahun Ajaran</b></td><td>: ${uData.pro.academicYear || '-'} | Sem: ${uData.pro.semester || '-'}</td></tr>
           </table>
-          <div class="cv-sec">Riwayat Pendidikan</div><ul>${uData.cv.E.map(i=>`<li>${i}</li>`).join('')}</ul>
-          <div class="cv-sec">Pengalaman Organisasi</div><ul>${uData.cv.O.map(i=>`<li>${i}</li>`).join('')}</ul>
-          <div class="cv-sec">Prestasi & Keahlian</div><ul>${uData.cv.S.map(i=>`<li>${i}</li>`).join('')}</ul>
-          <div style="margin-top:40px; text-align:right; font-size:12px;">Dibuat Otomatis Sistem Asisten Guru<br>&copy; 2026 3D Creative</div>
-        `; window.print();
+        `;
+        
+        // Loop Setiap Kategori Dinamis yang Dimasukkan Guru
+        uData.cv.forEach(c => {
+          if (c.items && c.items.length > 0) {
+            printHtml += `<div class="cv-sec">${c.cat}</div><ul>`;
+            c.items.forEach(item => {
+              printHtml += `<li>${item}</li>`;
+            });
+            printHtml += `</ul>`;
+          }
+        });
+
+        // Footer Cetak
+        printHtml += `<div style="margin-top:40px; text-align:right; font-size:12px;">Dibuat Otomatis Sistem Asisten Guru<br>&copy; 2026 3D Creative</div>`;
+        
+        document.getElementById('printArea').innerHTML = printHtml; 
+        window.print();
       });
     }
 
     // --- LOCAL / CLOUD STORAGE ---
     function saveLoc() { localStorage.setItem("d_"+cUser, JSON.stringify(uData)); }
-    function loadLoc() { const d = localStorage.getItem("d_"+cUser); if(d) { const p = JSON.parse(d); uData.pro = p.pro||{}; uData.drw = p.drw||[]; uData.agn = p.agn||[]; uData.cv = p.cv||{E:[],O:[],S:[]}; } }
+    
+    function loadLoc() { 
+      const d = localStorage.getItem("d_"+cUser); 
+      if(d) { 
+        const p = JSON.parse(d); 
+        uData.pro = p.pro || {}; 
+        uData.drw = p.drw || []; 
+        uData.agn = p.agn || []; 
+        
+        // MIGRATOR CERDAS: Mencegah data CV versi lawas hilang
+        // Mengubah format { E:[], O:[], S:[] } lama menjadi array dinamis baru
+        if (p.cv && typeof p.cv === 'object' && !Array.isArray(p.cv)) {
+          let newCV = [];
+          if (p.cv.E && p.cv.E.length > 0) newCV.push({ cat: "Pendidikan", items: p.cv.E });
+          if (p.cv.O && p.cv.O.length > 0) newCV.push({ cat: "Organisasi", items: p.cv.O });
+          if (p.cv.S && p.cv.S.length > 0) newCV.push({ cat: "Prestasi/Keahlian", items: p.cv.S });
+          uData.cv = newCV;
+        } else {
+          uData.cv = p.cv || [];
+        }
+      } 
+    }
+    
     function doLogout() { localStorage.removeItem("ag_user"); cUser=null; switchV('vAuth'); }
     
     function runSyncProfile() { 
