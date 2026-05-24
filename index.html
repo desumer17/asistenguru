@@ -75,6 +75,22 @@
 
     .footer { text-align: center; font-size: 11px; color: var(--text-muted); margin-top: 40px; padding: 15px; border-top: 1px solid rgba(255,255,255,0.05); }
 
+    /* LOADING OVERLAY CSS */
+    .loading-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.85); z-index: 10000; display: none;
+      flex-direction: column; justify-content: center; align-items: center;
+      color: var(--white); backdrop-filter: blur(4px); text-align: center;
+    }
+    .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.2);
+      border-top: 4px solid var(--color-gold);
+      border-radius: 50%; width: 50px; height: 50px;
+      animation: spin 1s linear infinite; margin-bottom: 15px;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .loading-text { font-size: 15px; font-weight: bold; letter-spacing: 1px; color: var(--color-gold); }
+
     /* A4 CV Print CSS */
     @media print {
       body * { visibility: hidden; }
@@ -90,6 +106,11 @@
   </style>
 </head>
 <body>
+
+  <div class="loading-overlay" id="sysLoading">
+    <div class="spinner"></div>
+    <div class="loading-text" id="loadingText">Memproses...</div>
+  </div>
 
   <div class="popup-overlay" id="sysPopup">
     <div class="popup-box">
@@ -216,7 +237,7 @@
   <div class="footer">Hak Cipta &copy; 2026 3D Creative</div>
 
   <script>
-    // ===== MASTER SERVER URL: GANTI DENGAN LINK APPS SCRIPT BOS =====
+    // ===== MASTER SERVER URL BOS =====
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzamSNAHNkpVaCKoTj6YSrQOIUceDg87HaD5jnvjCPeXiw-UKcahnwsp5f3dkOnOkT-cg/exec";
 
     let cUser = null;
@@ -239,31 +260,40 @@
     function switchV(id) { document.querySelectorAll('.app-view').forEach(v => v.classList.remove('active')); document.getElementById(id).classList.add('active'); window.scrollTo(0,0); }
     function toggleA(isL) { document.getElementById('cLogin').style.display = isL ? 'block' : 'none'; document.getElementById('cReg').style.display = isL ? 'none' : 'block'; }
 
-    // Popup Jaring Pengaman
+    // Popup & Loading Engine
     function askPop(msg, cb) { document.getElementById('popupMsg').innerText = msg; document.getElementById('sysPopup').style.display = 'flex'; popCB = cb; }
     document.getElementById('popConfirm').onclick = () => { document.getElementById('sysPopup').style.display = 'none'; if(popCB) popCB(); };
     document.getElementById('popCancel').onclick = () => { document.getElementById('sysPopup').style.display = 'none'; popCB = null; };
 
+    function showLoading(text) { document.getElementById('loadingText').innerText = text || "Memproses..."; document.getElementById('sysLoading').style.display = 'flex'; }
+    function hideLoading() { document.getElementById('sysLoading').style.display = 'none'; }
+
     // Login & Register via Fetch
     function doReg() {
       if(!navigator.onLine) return alert("Pendaftaran butuh internet.");
+      showLoading("Mendaftarkan akun ke Server...");
       fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "register", payload: { username: document.getElementById('rUser').value, password: document.getElementById('rPass').value, fullName: document.getElementById('rName').value }}) })
-      .then(r => r.json()).then(d => { alert(d.message); if(d.status === "success") toggleA(true); });
+      .then(r => r.json()).then(d => { hideLoading(); alert(d.message); if(d.status === "success") toggleA(true); })
+      .catch(e => { hideLoading(); alert("Terjadi kesalahan jaringan."); });
     }
+    
     function doLogin() {
       const u = document.getElementById('lUser').value, p = document.getElementById('lPass').value;
       if(!navigator.onLine) {
         if(localStorage.getItem("ag_user") === u) { loadLoc(); switchV('vDash'); renderDash(); return; }
         return alert("Login pertama kali wajib online.");
       }
+      showLoading("Mencocokkan data login...");
       fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "login", payload: { username: u, password: p }}) })
       .then(r => r.json()).then(d => {
+        hideLoading();
         if(d.status === "success") {
           cUser = d.profile.username; localStorage.setItem("ag_user", cUser);
           uData.pro = d.profile; uData.drw = d.drawers; uData.agn = d.agendas;
           saveLoc(); d.profile.onboarded ? (switchV('vDash'), renderDash()) : openOnboard();
         } else alert(d.message);
-      });
+      })
+      .catch(e => { hideLoading(); alert("Terjadi kesalahan jaringan atau server."); });
     }
 
     // Photo Compressor (Base64)
@@ -287,6 +317,7 @@
       ['Name','Nip','School','Kepsek','KepsekNip','Year'].forEach(k => document.getElementById('o'+k).value = uData.pro[k.toLowerCase()] || "");
       const ph = localStorage.getItem("p_"+cUser); if(ph) document.getElementById('oPhoto').innerHTML = `<img src="${ph}">`;
     }
+    
     function saveOnboard() {
       askPop("Yakin data pegawai sudah benar?", () => {
         uData.pro = { username: cUser, fullName: document.getElementById('oName').value, nip: document.getElementById('oNip').value, schoolName: document.getElementById('oSchool').value, headmasterName: document.getElementById('oKepsek').value, headmasterNip: document.getElementById('oKepsekNip').value, semester: document.getElementById('oSem').value, academicYear: document.getElementById('oYear').value, onboarded: true };
@@ -387,8 +418,19 @@
     function loadLoc() { const d = localStorage.getItem("d_"+cUser); if(d) { const p = JSON.parse(d); uData.pro = p.pro||{}; uData.drw = p.drw||[]; uData.agn = p.agn||[]; uData.cv = p.cv||{E:[],O:[],S:[]}; } }
     function doLogout() { localStorage.removeItem("ag_user"); cUser=null; switchV('vAuth'); }
     
-    function runSyncProfile() { if(!navigator.onLine) return; fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "saveProfile", payload: uData.pro }) }); }
-    function runSync() { if(!navigator.onLine || !cUser) return; fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "syncData", payload: { username: cUser, drawers: uData.drw, agendas: uData.agn } }) }); }
+    function runSyncProfile() { 
+      if(!navigator.onLine) return; 
+      showLoading("Menyimpan Identitas ke Cloud...");
+      fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "saveProfile", payload: uData.pro }) })
+      .then(() => hideLoading()).catch(() => hideLoading()); 
+    }
+    
+    function runSync() { 
+      if(!navigator.onLine || !cUser) return; 
+      showLoading("Sinkronisasi Data...");
+      fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "syncData", payload: { username: cUser, drawers: uData.drw, agendas: uData.agn } }) })
+      .then(() => hideLoading()).catch(() => hideLoading()); 
+    }
   </script>
 
   <script>
